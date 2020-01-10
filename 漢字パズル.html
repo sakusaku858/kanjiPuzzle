@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<body>
+    <div id="problem">
+     </div>
+    <script type="text/javascript">
+
+        function sort(a){
+            for(var i=0;i<a.length;i++){
+                var min = i;
+                for(var j=i;j<a.length;j++){
+                    if(a[min].length>a[j].length){
+                        min=j;
+                    }
+                }
+                var tmp = a[i];
+                a[i]=a[min];
+                a[min]=tmp;
+            }
+            return a;
+        }
+
+        function makeAllKanjiList(a){
+            var kanjiList = [];
+            for(var i=0;i<a.length;i++){
+                for(var j=0;j<a[i].length;j++){
+                    if(kanjiList.indexOf(a[i][j])==-1) kanjiList.push(a[i][j]);
+                }
+            }
+            return kanjiList;
+        }
+
+        function makeShutsugenKaisuList(word){
+            var kanjiList = makeAllKanjiList(word);
+            var shutsugenKaisuList=[];
+            for(var i=0;i<kanjiList.length;i++){
+                var n=0;
+                for(var j=0;j<word.length;j++){
+                    for(var k=0;k<word[j].length;k++){
+                        if(kanjiList[i]==word[j][k]) n++;
+                    }
+                }
+                shutsugenKaisuList.push(n);
+            }
+            return shutsugenKaisuList;
+        }
+
+        function makeMainKanjiList(word){
+            var all = makeAllKanjiList(word);
+            var kaisu = makeShutsugenKaisuList(word);
+            var mainList = [];
+            for(var i=0;i<all.length;i++){
+                if(kaisu[i]!=1){
+                    mainList.push(all[i]);
+                }
+            }
+            return mainList;
+        }
+
+        function makeChikanWord(word){
+            var mainList = makeMainKanjiList(word);
+            var chikan=[];
+            for(var i=0;i<word.length;i++){
+                var w=[];
+                for(var j=0;j<word[i].length;j++){
+                    var ind = mainList.indexOf(word[i][j]);
+                    if(ind>=0){
+                        w.push(ind);
+                    }else{
+                        w.push(word[i][j]);
+                    }
+                }
+                chikan.push(w);
+            }
+            return chikan;
+        }
+
+        function makeUserKanjiList(word){
+            var kanjiList = makeMainKanjiList(word);
+            var userList = new Array(kanjiList.length);
+            userList.fill("");
+            return userList;
+        }
+
+        
+        function draw(word){
+            var chikan = makeChikanWord(word);
+            var pro = document.getElementById("problem");
+            for(var i=0;i<chikan.length;i++){
+                var para = document.createElement("p");
+                var str = "";
+                for(var j=0;j<chikan[i].length;j++){
+                    str = str+chikan[i][j];
+                }
+                para.innerHTML = str;
+                pro.appendChild(para);
+            }
+        }
+
+        function setKanjiToBox(num,kanji){
+            var box = document.getElementsByClassName(""+num);
+            for(var i=0;i<box.length;i++){
+                box[i].value = kanji;
+            }
+        }
+
+        function onkeyupFunc(e){
+            var num = this.num;
+            var kanji = this.box.value;
+            setKanjiToBox(num,kanji);
+            console.log(this);
+        }
+        
+        function makeBox(num){
+            var b = document.createElement("input");
+            b.type ="text";
+            b.style.width = "20px";
+            b.classList.add(""+num);
+            b.addEventListener('keyup',{num:num,box:b,handleEvent:onkeyupFunc});
+            return b;
+        }
+
+        //["部",1,1,2,"分",3]のような配列を渡す
+        function makeWordTable(w){
+            var t = document.createElement("table");
+            t.cellPadding = "0";
+            var tr1 = document.createElement("tr");
+            tr1.align = "center"; 
+            tr1.vAlign = "bottom";
+            var tr2 = document.createElement("tr");
+            tr2.align = "center";
+            tr2.vAlign = "top";
+            for(var i=0;i<w.length;i++){
+                var td = document.createElement("td");
+                td.height = "20px";
+                if(isNaN(w[i])){
+                    td.innerHTML = w[i];
+                }else{
+                    td.appendChild(makeBox(w[i]));
+                }
+                tr1.appendChild(td);
+            }
+            for(var i=0;i<w.length;i++){
+                var td = document.createElement("td");
+                td.height = "10px";
+                if(!isNaN(w[i])){
+                    var font = document.createElement("font");
+                    font.size = "1";
+                    td.appendChild(font);
+                    font.innerHTML = ""+w[i];
+                }
+                tr2.appendChild(td);
+            }
+            t.appendChild(tr1);
+            t.appendChild(tr2);
+            return t;
+        }
+
+        function makeAllWordTable(word){
+            var chikan = makeChikanWord(word);
+            var table = document.createElement("table");
+            table.cellPadding="10";
+            var tr = document.createElement("tr");
+            tr.vAlign="top";
+            table.appendChild(tr);
+            var len = 0;
+            var td;
+            for(var i=0;i<chikan.length;i++){
+                if(chikan[i].length>len){
+                    td = document.createElement("td");
+                    len = chikan[i].length;
+                    tr.appendChild(td);
+                }
+                td.appendChild(makeWordTable(chikan[i]));
+            }
+            return table;
+        }
+
+        ///////main/////////
+
+        var word = [
+            "部分分数分解",
+            "発行部数",
+            "風力発電",
+            "電解質",
+            "質問箱",
+            "発展問題",
+            "百葉箱",
+            "百人力",
+            "葉緑素",
+            "双子素数",
+            "素粒子物理学",
+            "学会発表",
+            "風物詩",
+            "表面張力",
+            "海外出張",
+            "海綿体",
+            "日本海",
+            "日曜日",
+            "百日咳",
+            "正多面体",
+            "正面突破",
+            "破傷風"
+        ];
+        
+        word = sort(word);
+        var t = makeAllWordTable(word);
+        var p = document.getElementById("problem");
+        p.appendChild(t);
+
+        
+
+
+    </script>
+</body>
+
+</html>
